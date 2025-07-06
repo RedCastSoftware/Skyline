@@ -1,14 +1,10 @@
 const express = require('express');
-const axios = require('axios');
+const puppeteer = require('puppeteer');
 
 const app = express();
 
-// Hardcoded browserless API key — replace with your new key
-const BROWSERLESS_API_KEY = '2SdFEhnaPBuKA2R3ee2a3c3e1c4d40b8b9dacb62697a45cc7';
-const BROWSERLESS_URL = `https://chrome.browserless.io/content?token=${BROWSERLESS_API_KEY}`;
-
 app.get('/', (req, res) => {
-  res.send('Browserless.io proxy server is running');
+  res.send('Puppeteer proxy server running');
 });
 
 app.get('/proxy', async (req, res) => {
@@ -16,14 +12,20 @@ app.get('/proxy', async (req, res) => {
   if (!url) return res.status(400).send('No URL specified');
 
   try {
-    const response = await axios.post(BROWSERLESS_URL, { url: url });
-    res.send(response.data);
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle2' });
+    
+    const content = await page.content();
+    await browser.close();
+
+    res.send(content);
   } catch (err) {
     res.status(500).send(`Error: ${err.message}`);
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Proxy listening on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Proxy listening on port ${PORT}`));
