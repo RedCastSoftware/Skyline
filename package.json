@@ -1,2 +1,13 @@
-npm init -y
-npm install express request
+{
+  "name": "my-proxy-app",
+  "version": "1.0.0",
+  "description": "A simple Node.js proxy server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "request": "^2.88.2"
+  }
+}
